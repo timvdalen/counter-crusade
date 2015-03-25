@@ -68,5 +68,33 @@
 		ui.bigButton("Charge!", function () {
 			server.send('increase');
 		});
+
+		// Store
+		dom.section(function () {
+			var money = db.shared.ref('counters').get(plugin.userId()).money,
+				renderStoreItem = function (id, name, description) {
+					return function () {
+						dom.style({Box: 'middle'});
+
+						dom.div(function () {
+							dom.style({Box: 'vertical', Flex: 1});
+							dom.b(name);
+							dom.div(description);
+						});
+						dom.div(function () {
+							ui.button("Koop!", function () {
+								//server.call koop id
+							});
+						});
+					};
+				};
+
+			dom.h2("De winkel");
+			dom.p("Je hebt op dit moment " + money + " geld!");
+			ui.list(function () {
+				ui.item(renderStoreItem('multiplier', 'Multiplier', 'Kost ongeveer 3 vijftig ofzo'));
+				ui.item(renderStoreItem('idle', 'Idle', 'Ramon klikt af en toe voor je'));
+			});
+		});
 	};
 }());

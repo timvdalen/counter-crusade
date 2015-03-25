@@ -32,10 +32,28 @@
 		reset(userId);
 	};
 	
+	exports.onUpgrade = function () {
+		// Set the timer
+		timer.set(600000, 'handout_money');
+	};
+
 	exports.client_increase = function () {
 		// Increase the count for the current user
 		var counter = db.shared.get('counters', plugin.userId());
 		counter.counter += 1;
 		db.shared.set('counters', plugin.userId(), counter);
+	};
+
+	exports.handout_money = function () {
+		var i, users, counter;
+		users = plugin.userIds();
+		for (i in users) {
+			if (users.hasOwnProperty(i)) {
+				counter = db.shared.get('counters', users[i]);
+				counter.money += Math.floor((counter.counter - counter.prev) * 0.10);
+				counter.prev = counter.counter;
+				db.shared.set('counters', users[i], counter);
+			}
+		}
 	};
 }());
