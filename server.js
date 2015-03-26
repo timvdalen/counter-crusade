@@ -5,7 +5,8 @@
 	var db = require('db'),
 		plugin = require('plugin'),
 		timer = require('timer'),
-		reset;
+		reset,
+		setMoneyTimer;
 	
 	reset = function (userId) {
 		db.shared.set('counters', userId, {
@@ -14,6 +15,10 @@
 			money: 0,
 			prev: 0
 		});
+	};
+	
+	setMoneyTimer = function () {
+		timer.set(600000, 'handout_money');
 	};
 	
 	exports.onInstall = function () {
@@ -34,7 +39,7 @@
 	
 	exports.onUpgrade = function () {
 		// Set the timer
-		timer.set(600000, 'handout_money');
+		setMoneyTimer();
 	};
 
 	exports.client_increase = function () {
@@ -55,5 +60,7 @@
 				db.shared.set('counters', users[i], counter);
 			}
 		}
+		
+		setMoneyTimer();
 	};
 }());
