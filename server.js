@@ -5,15 +5,21 @@
 	var db = require('db'),
 		plugin = require('plugin'),
 		timer = require('timer'),
+		shop = require('shop'),
 		reset,
 		setMoneyTimer;
 	
 	reset = function (userId) {
+		// I probably need to rethink the schema before I really release anything...
 		db.shared.set('counters', userId, {
 			user: userId,
 			counter: 0,
 			money: 0,
 			prev: 0
+		});
+		db.shared.set('items', userId, {
+			user: userId,
+			multiplier: 0
 		});
 	};
 	
@@ -47,6 +53,10 @@
 		var counter = db.shared.get('counters', plugin.userId());
 		counter.counter += 1;
 		db.shared.set('counters', plugin.userId(), counter);
+	};
+
+	exports.client_purchase = function (key) {
+		shop.purchase(key);
 	};
 
 	exports.handout_money = function () {

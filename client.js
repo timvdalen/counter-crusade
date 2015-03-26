@@ -7,7 +7,8 @@
 		plugin = require('plugin'),
 		obs = require('obs'),
 		db = require('db'),
-		server = require('server');
+		server = require('server'),
+		shop = require('shop');
 
 	exports.render = function () {
 		var progress = obs.create(-10);
@@ -88,38 +89,53 @@
 		});
 
 		// Main button
-		ui.bigButton("Charge!", function () {
-			server.send('increase');
+		obs.observe(function () {
+			var multiplier = db.shared.ref('items').get(plugin.userId()).multiplier;
+			ui.bigButton("Charge!", function () {
+				server.send('increase');
 
-			// progress ranges from -10 to 110
-			progress.set((((progress.get() + 10) + 1) % 110) - 10);
+				// progress ranges from -10 to 110
+				progress.set((((progress.get() + 10) + multiplier) % 110) - 10);
+			});
 		});
 
 		// Store
 		dom.section(function () {
 			var money = db.shared.ref('counters').get(plugin.userId()).money,
-				renderStoreItem = function (id, name, description) {
+				renderStoreItem = function (shopItem) {
 					return function () {
+						var items = db.shared.ref('items').get(plugin.userId());
+
 						dom.style({Box: 'middle'});
 
 						dom.div(function () {
 							dom.style({Box: 'vertical', Flex: 1});
-							dom.b(name);
-							dom.div(description);
+							dom.b(shopItem.name);
+							dom.div("Nu: " + shopItem.amount(items) + ", kost: " + shopItem.price(items));
 						});
-						dom.div(function () {
-							ui.button("Koop!", function () {
-								//server.call koop id
+
+						if (money >= shopItem.price(items)) {
+							dom.div(function () {
+								ui.button("Koop!", function () {
+									server.call('purchase', shopItem.key);
+								});
 							});
-						});
+						}
 					};
-				};
+				},
+				items;
+
+			items = shop.items();
 
 			dom.h2("De winkel");
 			dom.p("Je hebt op dit moment " + money + " geld!");
 			ui.list(function () {
-				ui.item(renderStoreItem('multiplier', 'Multiplier', 'Kost ongeveer 3 vijftig ofzo'));
-				ui.item(renderStoreItem('idle', 'Idle', 'Ramon klikt af en toe voor je'));
+				var key;
+				for (key in items) {
+					if (items.hasOwnProperty(key)) {
+						ui.item(renderStoreItem(items[key]));
+					}
+				}
 			});
 		});
 	};
