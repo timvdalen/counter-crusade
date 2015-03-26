@@ -38,7 +38,7 @@
 			});
 
 			scores.sort(function (a, b) {
-				return a.counter < b.counter;
+				return b.counter - a.counter;
 			});
 
 			// Show number one
