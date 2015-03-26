@@ -10,6 +10,8 @@
 		server = require('server');
 
 	exports.render = function () {
+		var progress = obs.create(-10);
+
 		// Ranking
 		obs.observe(function () {
 			var counters, scores, i, renderItem;
@@ -64,9 +66,33 @@
 			dom.last().style({display: 'none'});
 		});
 		
+		// Progress bar
+		dom.div(function () {
+			dom.style({
+				height: 18,
+				borderRadius: '2px',
+				border: '1px solid #ba1a6e',
+				overflow: 'hidden'
+			});
+
+			dom.div(function () {
+				obs.observe(function () {
+					dom.style({
+						width: '10%',
+						height: '100%',
+						background: '#ba1a6e',
+						marginLeft: progress.get() + '%'
+					});
+				});
+			});
+		});
+
 		// Main button
 		ui.bigButton("Charge!", function () {
 			server.send('increase');
+
+			// progress ranges from -10 to 110
+			progress.set((((progress.get() + 10) + 1) % 110) - 10);
 		});
 
 		// Store
