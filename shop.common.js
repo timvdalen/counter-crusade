@@ -31,6 +31,7 @@
 		'multiplier': {
 			key: 'multiplier',
 			name: 'Multiplier',
+			description: 'Meer clicks = meer beter',
 			price: function (item) {
 				return getItemValue(item, 'multiplier') * getItemValue(item, 'multiplier') * 350;
 			},
@@ -41,6 +42,11 @@
 		'money': {
 			key: 'money',
 			name: 'Geld.',
+			description: function () {
+				var dom = require('dom');
+				dom.a('youtu.be/gxFGhQsaSwI');
+				dom.last().prop('href', 'http://youtu.be/gxFGhQsaSwI');
+			},
 			price: function (item) {
 				return getItemValue(item, 'money') * getItemValue(item, 'money') * 1000;
 			},

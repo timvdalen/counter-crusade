@@ -111,6 +111,9 @@
 						dom.div(function () {
 							dom.style({Box: 'vertical', Flex: 1});
 							dom.b(shopItem.name);
+							dom.div(function () {
+								dom.em(shopItem.description);
+							});
 							dom.div("Nu: " + shopItem.amount(items) + ", kost: " + shopItem.price(items));
 						});
 
