@@ -11,7 +11,8 @@
 		shop = require('shop');
 
 	exports.render = function () {
-		var progress = obs.create(-10);
+		var progress = obs.create(-10),
+			lastRank = -1;
 
 		// Ranking
 		obs.observe(function () {
@@ -68,6 +69,15 @@
 				dom.style({marginTop: '20px'});
 				// Show the top 3, including you if you're lower
 				for (i = 1; i < scores.length; i += 1) {
+					// Check if rank has changed since last time
+					if (scores[i].user === plugin.userId()) {
+						if (lastRank !== -1 && i < lastRank) {
+							// We went up
+							server.send('beat', plugin.userId(), scores[i + 1].user);
+						}
+						lastRank = i;
+					}
+
 					if (i > 3 && scores[i].user === plugin.userId()) {
 						// Show dots
 						ui.item(renderDots);

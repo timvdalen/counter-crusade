@@ -6,6 +6,7 @@
 		plugin = require('plugin'),
 		timer = require('timer'),
 		shop = require('shop'),
+		event = require('event'),
 		reset,
 		setMoneyTimer;
 	
@@ -56,6 +57,21 @@
 
 	exports.client_purchase = function (key) {
 		shop.purchase(key);
+	};
+
+	exports.client_beat = function (userwin, userlose) {
+		// Message to all other users
+		event.create({
+			unit: 'beat',
+			text: plugin.userName(userwin) + " heeft " + plugin.userName(userlose) + " ingemaakt",
+			exclude: [userwin, userlose]
+		});
+		// Message to loser
+		event.create({
+			unit: 'beat',
+			text: plugin.userName(userwin) + " heeft je echt belachelijk hard geshamed...",
+			include: [userlose]
+		});
 	};
 
 	exports.handout_money = function () {
