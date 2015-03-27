@@ -52,9 +52,26 @@
 			});
 			
 			ui.list(function () {
+				var renderDots = function () {
+					dom.style({
+						textAlign: 'center',
+						minHeight: 0
+					});
+					dom.h1("· · ·");
+					dom.last().style({
+						width: '100%',
+						marginTop: -10,
+						marginBottom: -10
+					});
+				};
+
 				dom.style({marginTop: '20px'});
 				// Show the top 3, including you if you're lower
 				for (i = 1; i < scores.length; i += 1) {
+					if (i > 3 && scores[i].user === plugin.userId()) {
+						// Show dots
+						ui.item(renderDots);
+					}
 					// Only show top 3 and user
 					if (i < 3 || scores[i].user === plugin.userId()) {
 						ui.item(renderItem(scores[i]));
