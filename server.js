@@ -19,7 +19,7 @@
 		});
 		db.shared.set('items', userId, {
 			user: userId,
-			multiplier: 0
+			multiplier: 1
 		});
 	};
 	
@@ -51,7 +51,7 @@
 	exports.client_increase = function () {
 		// Increase the count for the current user
 		var counter = db.shared.get('counters', plugin.userId());
-		counter.counter += 1;
+		counter.counter += db.shared.get('items', plugin.userId()).multiplier;
 		db.shared.set('counters', plugin.userId(), counter);
 	};
 
