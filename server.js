@@ -18,8 +18,7 @@
 			prev: 0
 		});
 		db.shared.set('items', userId, {
-			user: userId,
-			multiplier: 1
+			user: userId
 		});
 	};
 	
@@ -65,7 +64,11 @@
 		for (i in users) {
 			if (users.hasOwnProperty(i)) {
 				counter = db.shared.get('counters', users[i]);
-				counter.money += Math.floor((counter.counter - counter.prev) * 0.10);
+
+				// Increase money based on difference in count sinds last tick and the money multiplier
+				counter.money += Math.floor((counter.counter - counter.prev)
+											* (0.05 + (0.05 * shop.getItemValue(db.shared.get('items', users[i]), 'money'))));
+
 				counter.prev = counter.counter;
 				db.shared.set('counters', users[i], counter);
 			}

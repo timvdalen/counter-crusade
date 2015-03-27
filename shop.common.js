@@ -3,7 +3,27 @@
 	'use strict';
 
 	var plugin = require('plugin'),
-		db = require('db');
+		db = require('db'),
+		getItemValue,
+		increaseItemValue;
+
+	getItemValue = function (item, key) {
+		if (item.hasOwnProperty(key)) {
+			return item[key];
+		} else {
+			return 1;
+		}
+	};
+
+	increaseItemValue = function (items, key) {
+		if (!items.hasOwnProperty(key)) {
+			items[key] = 1;
+		}
+
+		items[key] += 1;
+
+		return items;
+	};
 
 	// The purchasable items in the store
 	// Has a string key, name and functions price and amount, which get a database item
@@ -12,10 +32,20 @@
 			key: 'multiplier',
 			name: 'Multiplier',
 			price: function (item) {
-				return item.multiplier * item.multiplier * 350;
+				return getItemValue(item, 'multiplier') * getItemValue(item, 'multiplier') * 350;
 			},
 			amount: function (item) {
-				return item.multiplier;
+				return getItemValue(item, 'multiplier');
+			}
+		},
+		'money': {
+			key: 'money',
+			name: 'Geld.',
+			price: function (item) {
+				return getItemValue(item, 'money') * getItemValue(item, 'money') * 1000;
+			},
+			amount: function (item) {
+				return getItemValue(item, 'money');
 			}
 		}
 	}; };
@@ -34,8 +64,11 @@
 			userMain.money -= price;
 			db.shared.set('counters', plugin.userId(), userMain);
 
-			userItems[item.key] += 1;
+			userItems = increaseItemValue(userItems, item.key);
+
 			db.shared.set('items', plugin.userId(), userItems);
 		}
 	};
+
+	exports.getItemValue = getItemValue;
 }());
