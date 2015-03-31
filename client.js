@@ -11,8 +11,11 @@
 		shop = require('shop');
 
 	exports.render = function () {
-		var progress = obs.create(-10),
-			lastRank = -1;
+		var progress = obs.create(-10);
+		var rank = obs.create(-1);
+		// the number of clicks since start
+		var clicks = obs.create(0);
+		var	lastRank = -1;
 
 		// Ranking
 		obs.observe(function () {
@@ -83,10 +86,13 @@
 						ui.item(renderDots);
 					}
 					// Only show top 3 and user
-					if (i < 3 || scores[i].user === plugin.userId()) {
+					if ((i < 3 || scores[i].user === plugin.userId()) && i) {
 						ui.item(renderItem(scores[i]));
 					}
 				}
+				
+				// update the rank
+				rank.set(lastRank);
 				
 				// update the progress bar
 				if (lastRank !== -1 && lastRank !== 0) {
@@ -105,11 +111,7 @@
 					}
 					
 					// update the progress
-					progress.set(110 * (score - scoreDown) / (scoreUp - scoreDown) - 10);
-				} else {
-					// the rank is not defined
-					// TODO: add version for player 1 and unknown player
-					progress.set(50);
+					progress.set((score - scoreDown) / (scoreUp - scoreDown));
 				}
 			});
 
@@ -119,30 +121,44 @@
 		});
 		
 		// Progress bar
-		dom.div(function () {
-			dom.style({
-				height: 18,
-				borderRadius: '2px',
-				border: '1px solid #ba1a6e',
-				overflow: 'hidden'
-			});
-
+		obs.observe(function () {
+			// whether this player is #1
+			var isFirst = !rank.get();
+			
 			dom.div(function () {
-				obs.observe(function () {
-					dom.style({
-						width: '10%',
-						height: '100%',
-						background: '#ba1a6e',
-						marginLeft: progress.get() + '%'
+				dom.style({
+					height: 18,
+					borderRadius: '2px',
+					border: '1px solid #ba1a6e',
+					overflow: 'hidden',
+					background: isFirst? '#d8c929': 'inherit'
+				});
+	
+				dom.div(function () {
+					obs.observe(function () {
+						var margin;
+						if (isFirst) margin = clicks.get() % 110 - 10;
+						else margin = 110 * progress.get() - 10;
+						
+						dom.style({
+							width: '10%',
+							height: '100%',
+							background: '#ba1a6e',
+							marginLeft: margin + '%'
+						});
 					});
 				});
 			});
+			
 		});
 
 		// Main button
 		obs.observe(function () {
 			ui.bigButton("Charge!", function () {
 				server.send('increase');
+				clicks.modify(function (x) {
+					return x + 1;
+				});
 			});
 		});
 
