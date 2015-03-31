@@ -68,7 +68,7 @@
 
 				dom.style({marginTop: '20px'});
 				// Show the top 3, including you if you're lower
-				for (i = 1; i < scores.length; i += 1) {
+				for (i = 0; i < scores.length; i += 1) {
 					// Check if rank has changed since last time
 					if (scores[i].user === plugin.userId()) {
 						if (lastRank !== -1 && i < lastRank) {
@@ -86,6 +86,30 @@
 					if (i < 3 || scores[i].user === plugin.userId()) {
 						ui.item(renderItem(scores[i]));
 					}
+				}
+				
+				// update the progress bar
+				if (lastRank !== -1 && lastRank !== 0) {
+					// the rank is defined and the player is not the first
+					
+					// the score of the user
+					var score = scores[lastRank].counter;
+					// the score of the player ahead of the player
+					var scoreUp = scores[lastRank - 1].counter;
+					// the score of the player behind the player
+					var scoreDown;
+					if (lastRank + 1 === scores.length) { // this player is the last
+						scoreDown = 0;
+					} else { // there is a player behind him
+						scoreDown = scores[lastRank + 1].counter;
+					}
+					
+					// update the progress
+					progress.set(110 * (score - scoreDown) / (scoreUp - scoreDown) - 10);
+				} else {
+					// the rank is not defined
+					// TODO: add version for player 1 and unknown player
+					progress.set(50);
 				}
 			});
 
@@ -117,12 +141,8 @@
 
 		// Main button
 		obs.observe(function () {
-			var multiplier = db.shared.ref('items').get(plugin.userId()).multiplier;
 			ui.bigButton("Charge!", function () {
 				server.send('increase');
-
-				// progress ranges from -10 to 110
-				progress.set((((progress.get() + 10) + multiplier) % 110) - 10);
 			});
 		});
 
