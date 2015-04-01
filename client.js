@@ -11,11 +11,10 @@
 		shop = require('shop');
 
 	exports.render = function () {
-		var progress = obs.create(-10);
-		var rank = obs.create(-1);
-		// the number of clicks since start
-		var clicks = obs.create(0);
-		var	lastRank = -1;
+		var progress = obs.create(-10),
+			rank = obs.create(-1),
+			clicks = obs.create(0), // the number of clicks since start
+			lastRank = -1;
 
 		// Ranking
 		obs.observe(function () {
@@ -86,7 +85,7 @@
 						ui.item(renderDots);
 					}
 					// Only show top 3 and user
-					if ((i < 3 || scores[i].user === plugin.userId()) && i) {
+					if ((i < 3 || scores[i].user === plugin.userId()) && i !== 0) {
 						ui.item(renderItem(scores[i]));
 					}
 				}
@@ -98,12 +97,13 @@
 				if (lastRank !== -1 && lastRank !== 0) {
 					// the rank is defined and the player is not the first
 					
-					// the score of the user
-					var score = scores[lastRank].counter;
-					// the score of the player ahead of the player
-					var scoreUp = scores[lastRank - 1].counter;
-					// the score of the player behind the player
-					var scoreDown;
+					var score, // the score of the user
+						scoreUp, // the score of the player ahead of the player
+						scoreDown; // the score of the player behind the player
+						
+					score = scores[lastRank].counter;
+					scoreUp = scores[lastRank - 1].counter;
+					
 					if (lastRank + 1 === scores.length) { // this player is the last
 						scoreDown = 0;
 					} else { // there is a player behind him
@@ -123,7 +123,7 @@
 		// Progress bar
 		obs.observe(function () {
 			// whether this player is #1
-			var isFirst = !rank.get();
+			var isFirst = rank.get() === 0;
 			
 			dom.div(function () {
 				dom.style({
