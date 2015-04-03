@@ -111,7 +111,7 @@
 					}
 					
 					// update the progress
-					progress.set((score - scoreDown) / (scoreUp - scoreDown));
+					progress.set((score - scoreDown) / Math.max(scoreUp - scoreDown, 1));
 				}
 			});
 
