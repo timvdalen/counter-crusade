@@ -12,6 +12,8 @@
 
 	exports.render = function () {
 		var progress = obs.create(-10),
+			rank = obs.create(-1),
+			clicks = obs.create(0), // the number of clicks since start
 			lastRank = -1;
 
 		// Ranking
@@ -68,7 +70,7 @@
 
 				dom.style({marginTop: '20px'});
 				// Show the top 3, including you if you're lower
-				for (i = 1; i < scores.length; i += 1) {
+				for (i = 0; i < scores.length; i += 1) {
 					// Check if rank has changed since last time
 					if (scores[i].user === plugin.userId()) {
 						if (lastRank !== -1 && i < lastRank) {
@@ -83,9 +85,33 @@
 						ui.item(renderDots);
 					}
 					// Only show top 3 and user
-					if (i < 3 || scores[i].user === plugin.userId()) {
+					if ((i < 3 || scores[i].user === plugin.userId()) && i !== 0) {
 						ui.item(renderItem(scores[i]));
 					}
+				}
+				
+				// update the rank
+				rank.set(lastRank);
+				
+				// update the progress bar
+				if (lastRank !== -1 && lastRank !== 0) {
+					// the rank is defined and the player is not the first
+					
+					var score, // the score of the user
+						scoreUp, // the score of the player ahead of the player
+						scoreDown; // the score of the player behind the player
+						
+					score = scores[lastRank].counter;
+					scoreUp = scores[lastRank - 1].counter;
+					
+					if (lastRank + 1 === scores.length) { // this player is the last
+						scoreDown = 0;
+					} else { // there is a player behind him
+						scoreDown = scores[lastRank + 1].counter;
+					}
+					
+					// update the progress
+					progress.set((score - scoreDown) / Math.max(scoreUp - scoreDown, 1));
 				}
 			});
 
@@ -95,34 +121,44 @@
 		});
 		
 		// Progress bar
-		dom.div(function () {
-			dom.style({
-				height: 18,
-				borderRadius: '2px',
-				border: '1px solid #ba1a6e',
-				overflow: 'hidden'
-			});
-
+		obs.observe(function () {
+			// whether this player is #1
+			var isFirst = rank.get() === 0;
+			
 			dom.div(function () {
-				obs.observe(function () {
-					dom.style({
-						width: '10%',
-						height: '100%',
-						background: '#ba1a6e',
-						marginLeft: progress.get() + '%'
+				dom.style({
+					height: 18,
+					borderRadius: '2px',
+					border: '1px solid #ba1a6e',
+					overflow: 'hidden',
+					background: isFirst? '#d8c929': 'inherit'
+				});
+	
+				dom.div(function () {
+					obs.observe(function () {
+						var margin;
+						if (isFirst) margin = clicks.get() % 110 - 10;
+						else margin = 110 * progress.get() - 10;
+						
+						dom.style({
+							width: '10%',
+							height: '100%',
+							background: '#ba1a6e',
+							marginLeft: margin + '%'
+						});
 					});
 				});
 			});
+			
 		});
 
 		// Main button
 		obs.observe(function () {
-			var multiplier = db.shared.ref('items').get(plugin.userId()).multiplier;
 			ui.bigButton("Charge!", function () {
 				server.send('increase');
-
-				// progress ranges from -10 to 110
-				progress.set((((progress.get() + 10) + multiplier) % 110) - 10);
+				clicks.modify(function (x) {
+					return x + 1;
+				});
 			});
 		});
 
