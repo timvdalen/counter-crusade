@@ -55,18 +55,22 @@
 			});
 			
 			ui.list(function () {
-				var renderDots = function () {
-					dom.style({
-						textAlign: 'center',
-						minHeight: 0
-					});
-					dom.h1("· · ·");
-					dom.last().style({
-						width: '100%',
-						marginTop: -10,
-						marginBottom: -10
-					});
-				};
+				var
+					score, // the score of the user
+					scoreUp, // the score of the player ahead of the player
+					scoreDown, // the score of the player behind the player
+					renderDots = function () {
+						dom.style({
+							textAlign: 'center',
+							minHeight: 0
+						});
+						dom.h1("· · ·");
+						dom.last().style({
+							width: '100%',
+							marginTop: -10,
+							marginBottom: -10
+						});
+					};
 
 				dom.style({marginTop: '20px'});
 				// Show the top 3, including you if you're lower
@@ -96,10 +100,6 @@
 				// update the progress bar
 				if (lastRank !== -1 && lastRank !== 0) {
 					// the rank is defined and the player is not the first
-					
-					var score, // the score of the user
-						scoreUp, // the score of the player ahead of the player
-						scoreDown; // the score of the player behind the player
 						
 					score = scores[lastRank].counter;
 					scoreUp = scores[lastRank - 1].counter;
@@ -131,14 +131,17 @@
 					borderRadius: '2px',
 					border: '1px solid #ba1a6e',
 					overflow: 'hidden',
-					background: isFirst? '#d8c929': 'inherit'
+					background: isFirst ? '#d8c929' : 'inherit'
 				});
 	
 				dom.div(function () {
 					obs.observe(function () {
 						var margin;
-						if (isFirst) margin = clicks.get() % 110 - 10;
-						else margin = 110 * progress.get() - 10;
+						if (isFirst) {
+							margin = clicks.get() % 110 - 10;
+						} else {
+							margin = 110 * progress.get() - 10;
+						}
 						
 						dom.style({
 							width: '10%',
