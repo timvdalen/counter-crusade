@@ -51,7 +51,7 @@
 	exports.client_increase = function () {
 		// Increase the count for the current user
 		var counter = db.shared.get('counters', plugin.userId());
-		counter.counter += db.shared.get('items', plugin.userId()).multiplier;
+		counter.counter += shop.getItemValue(db.shared.get('items', plugin.userId()), 'multiplier');
 		db.shared.set('counters', plugin.userId(), counter);
 	};
 
